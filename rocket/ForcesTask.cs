@@ -1,20 +1,19 @@
-﻿namespace func_rocket;
+using System;
+using System.Linq;
 
-public class ForcesTask
+namespace func_rocket
 {
-	/// <summary>
-	/// Создает делегат, возвращающий по ракете вектор силы тяги двигателей этой ракеты.
-	/// Сила тяги направлена вдоль ракеты и равна по модулю forceValue.
-	/// </summary>
-	public static RocketForce GetThrustForce(double forceValue) => r => Vector.Zero;
+    public class ForcesTask
+    {
+        public static RocketForce GetThrustForce(double forceValue) => r => new Vector(Math.Cos(r.Direction), Math.Sin(r.Direction)) * forceValue;
 
-	/// <summary>
-	/// Преобразует делегат силы гравитации, в делегат силы, действующей на ракету
-	/// </summary>
-	public static RocketForce ConvertGravityToForce(Gravity gravity, Vector spaceSize) => r => Vector.Zero;
+        public static RocketForce ConvertGravityToForce(Gravity gravity, Vector spaceSize) => r => gravity(spaceSize, r.Location);
 
-	/// <summary>
-	/// Суммирует все переданные силы, действующие на ракету, и возвращает суммарную силу.
-	/// </summary>
-	public static RocketForce Sum(params RocketForce[] forces) => forces[0];
+        public static RocketForce Sum(params RocketForce[] forces) => r => {
+            Vector totalForce = Vector.Zero;
+            foreach (var force in forces)
+                totalForce += force(r);
+            return totalForce;
+        };
+    }
 }
